@@ -5,9 +5,12 @@ from .models import *
 #Tag, Task, SubTask, Comment , Log
 
 class TaskSerializer(serializers.ModelSerializer):
+    # title = serializers.SerializerMethodField()
     class Meta :
         model = Task
         fields = "__all__"
+    # def get_title(self,obj):
+    #     return  "ggg"
 
 
 class SubTaskSerializer(serializers.ModelSerializer):
@@ -29,6 +32,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class LogSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
     class Meta:
         model = Log
         fields = "__all__"
+
+    def get_user(self,obj):
+        return obj.username

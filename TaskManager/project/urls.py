@@ -11,4 +11,5 @@ urlpatterns = [
     path("add_user/<int:proj_id>/", ADDUserToProject.as_view()),
     path("users_of_project/<int:proj_id>/", ViewUsersOfProject.as_view()),
 
+
 ]

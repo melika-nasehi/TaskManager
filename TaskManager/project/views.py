@@ -13,11 +13,13 @@ from .serializer import *
 from .models import Project
 from aaa.models import CustomUser
 from aaa.serializers import UserSerializer
+from aaa.permissions import IsAdminOrOwnerOrReadOnly
 
 
 # Create your views here.
 
 class ProjectList (APIView) :
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
 
     def get(self, request) :
         projects = Project.objects.all()
@@ -34,6 +36,7 @@ class ProjectList (APIView) :
 
 
 class ProjectDetail (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get_object(self, pk):
         try:
             return Project.objects.get(pk= pk)
@@ -62,6 +65,7 @@ class ProjectDetail (APIView):
 
 
 class ProjectOfUser (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get (self, request, user_id) :
         projects = Project.objects.filter(users__id=user_id)
         serialized_project = ProjectSerializer(projects, many=True)
@@ -69,7 +73,7 @@ class ProjectOfUser (APIView):
 
 
 class ADDUserToProject (APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsAdminOrOwnerOrReadOnly]
 
     def post(self, request, proj_id):
         user = request.user
@@ -95,6 +99,7 @@ class ADDUserToProject (APIView):
 
 
 class ViewUsersOfProject (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get(self, request, proj_id):
         try:
             project = Project.objects.get(id=proj_id)

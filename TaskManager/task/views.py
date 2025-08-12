@@ -6,14 +6,34 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_203_NON_AUTHORITATIVE_INFORMATION, HTTP_200_OK
 from rest_framework.views import APIView
 from .serialize import *
-from rest_framework import status
+from rest_framework import status, filters
 from .models import Task
-
+from aaa.permissions import IsAdminOrOwnerOrReadOnly
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets
 
 
 # Create your views here.
 
-class TaskList(APIView):
+
+
+# class MyCustomPagination(PageNumberPagination):
+#     page_size = 5
+#     page_size_query_param = 'page_size'  # allow client to change
+#     max_page_size = 100
+
+class TaskList(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    #filter
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title', 'status', 'project__title']
+    ordering_fields = ['deadline']
+    ordering = ['deadline']
+
+# class TaskList(APIView):
+#     permission_classes = [IsAdminOrOwnerOrReadOnly]
+#     pagination_class = MyCustomPagination
 
     def get(self, request):
         tasks = Task.objects.all()
@@ -29,6 +49,7 @@ class TaskList(APIView):
 
 
 class TaskDetails(APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get_object(self, pk):
         try :
             return Task.objects.get(pk= pk)
@@ -58,7 +79,7 @@ class TaskDetails(APIView):
 
 
 class ToggleCompleted (APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
 
     def post(self, request, task_id):
         user = request.user
@@ -71,4 +92,16 @@ class ToggleCompleted (APIView):
         task.is_completed = not task.is_completed
         task.save()
         return Response("is_completed: " + str(task.is_completed))
+
+class TaskOfUser(APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
+
+    def get (self, request, user_id):
+        tasks = Task.objects.filter(users__id = user_id)
+        serialized_task = TaskSerializer(tasks, many=True)
+        return Response(serialized_task.data)
+
+
+
+
 

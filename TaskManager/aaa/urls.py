@@ -16,5 +16,6 @@ urlpatterns = [
     path("not_completed/<int:user_id>/", GetNOTCompletedTasks.as_view()),
     path("expired_deadline/<int:user_id>/", DeadlineExpired.as_view()),
     path("sort_startdate/<int:user_id>/", SortProjectByStartDate.as_view()),
+    path("sort_task_deadline/<int:user_id>/", SortTasksByDeadline.as_view()),
 
 ]

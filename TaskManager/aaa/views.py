@@ -15,14 +15,18 @@ from task.serialize import TaskSerializer
 from datetime import date
 from project.models import Project
 from project.serializer import ProjectSerializer
-
+from .permissions import IsAdminOrOwnerOrReadOnly
+from rest_framework.permissions import IsAdminUser
 
 # Create your views here.
 
 class UserList (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
+
 
     def get(self, request):
         users = CustomUser.objects.all()
+        print(users)
         serialized_user = UserSerializer(users, many=True)
         return Response(serialized_user.data)
 
@@ -36,6 +40,7 @@ class UserList (APIView):
 
 
 class UserDetail (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get_object(self, pk):
         try:
             return CustomUser.objects.get(pk= pk)
@@ -66,9 +71,8 @@ class UserDetail (APIView):
 
 
     class LoginView(APIView):
+        permission_classes = [IsAdminOrOwnerOrReadOnly]
         authentication_classes = [SessionAuthentication, BasicAuthentication]
-        permission_classes = [IsAuthenticated]
-
         def get(self, request, format=None):
             content = {
                 'user': str(request.user),
@@ -78,6 +82,7 @@ class UserDetail (APIView):
 
 
 class GetNOTCompletedTasks (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get(self, request, user_id):
         tasks = Task.objects.filter(users__id=user_id, is_completed=False)
         serialized_task = TaskSerializer(tasks, many=True)
@@ -85,6 +90,7 @@ class GetNOTCompletedTasks (APIView):
 
 
 class DeadlineExpired (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get(self, request, user_id):
         now = date.today()
         task = Task.objects.filter(users__id=user_id, deadline__lt=now)
@@ -93,10 +99,22 @@ class DeadlineExpired (APIView):
 
 
 class SortProjectByStartDate (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
     def get(self, request, user_id):
         projects = Project.objects.filter(users__id=user_id).order_by('startDate')
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
+
+class SortTasksByDeadline (APIView):
+    permission_classes = [IsAdminOrOwnerOrReadOnly]
+    def get(self, request, user_id):
+        tasks = Task.objects.filter(users__id=user_id).order_by('deadline')
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+
+
+
+
 
 
 
